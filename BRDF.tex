@@ -1,0 +1,147 @@
+%文章核心问题是推导一种非视域成像中的成像方程，包括几何特点，中介面尺寸关系等成像要素。
+%非视域成像的关键点中，中介面BRDF有明确的直接影响。因此提出一种用TOF相机测量BRDF的方法，并且说明非视域成像问题中BRDF所占据的重要地位。
+
+%文章结构安排如下
+%引言：讨论非视域成像理论与方法，包括BRDF的影响。引出，本文给出一种非视域成像的几何理论推导
+%非视域成像原理：非视域成像模型推导，给出非视域成像场景，非视域成像几何关系，给出计算公式与模型，给出模型下的成像结论
+%TOF相机测量BRDF的方法：TOF相机在这种情况下BRDF测量方法，以及测量结果对非视域成像理论的影响，给出公式描述
+%非视域成像优化方法（可选）：再想想，考虑神经网络MLP，信息熵，距离加权测光
+%实验部分：首先给出BRDF的测量效果与结论。在给出这种情况下，不同位置，视场，与不同BRDF搭配清凉下非视域深度成像，同时给出普通相机和TOF相机图片的对比。
+%结论
+
+%创新点：1.给出一种TOF相机测量BRDF的方法（再想想具体的执行方法）；2.给出一种基于BRDF的TOF相机几何成像方程。3.给出一种优化方法（可选）
+
+%可以做一下，在不同BRDF条件下时，非视域目标返回强度对比。
+\documentclass[sensors,article,accept,moreauthors,pdftex,10pt,a4paper]{mdpi} 
+\firstpage{1} 
+\makeatletter 
+\setcounter{page}{\@firstpage} 
+\makeatother 
+\articlenumber{x}
+\doinum{10.3390/------}
+\pubvolume{18}
+\pubyear{2018}
+\copyrightyear{2018}
+
+\usepackage{booktabs} 
+\usepackage{multirow}
+\usepackage{soul} 
+\usepackage{microtype}
+\setitemize{parsep=6pt,itemsep=0pt,leftmargin=*,labelsep=5.5mm}
+\setenumerate{parsep=6pt,itemsep=0pt,leftmargin=*,labelsep=5.5mm}
+\setlist[description]{itemsep=0mm}   
+
+
+\Title{Study on Materials of BRDF Based on TOF Camera in Non-Line-of-Sight Imaging}
+
+% Author Orchid ID: enter ID or remove command
+\newcommand{\orcidauthorA}{0000-0002-2770-9242} % Add \orcidA{} behind the author's name
+
+\Author{Yu-Jie Fang $^{1,2}$\orcidA{}, Xia Wang $^{1,2,}$*, Zhi-Bin Sun $^{3}$, Zheng-Yang Shi $^{1} $, Si He $^{1}$ and Bing-Hua Su $^{1,2}$}
+%Please carefully check the accuracy of names and affiliations. Changes will not be possible after proofreading. 
+
+\address{%
+$^{1}$ \quad Key Laboratory of Optoelectronic Imaging Technology and System, Ministry of Education, School of Optics and Photonics, Beijing Institute of Technology, Beijing 100081, China; fyj0202@126.com (Y.-J.F.); 916295087@qq.com (Z.-Y.S.); hesi2010bit@foxmail.com (S.H.); bhsu888@aliyun.com (B.-H.S.)  \\%please provide email of the author whose affiliation is ``1''. ranged as XXX@XX.com (Y.-J.F.); YYY@YY.com (Z.-Y.S.); ZZZ@ZZ.com (S.H.); MMM@MM.com (B.-H.S.)
+$^{2}$ \quad Beijing Institute of Technology, Zhuhai 519000, China\\
+$^{3}$ \quad National Space Science Center, the Chinese Academy of Sciences, Beijing 100081, China; zbsun@nssc.ac.cn}
+
+% Contact information of the corresponding author
+\corres{Correspondence: angelniuniu@bit.edu.cn; Tel.: +86-138-1167-0583}
+
+%\abstract{非视域成像的目的是对拐角处，相机观察视场外，的目标实施图像采集或三维重构，是一种计算成像技术。对视场外目标成像需要借助中介面反射，但中介面反射是一种随机散射过程，不同中介面的BRDF特性与场景目标对非视域信息重构造成困难。本文提出一种理想场景下非视域成像的几何光路模型，并且基于TOF相机提出一种中介面的BRDF测量方法，能够分析非视域成像问题中相机视场角与障碍物缝隙尺寸和中介面尺寸之间的关系，同时借助中介面BRDF特性给出一种物象关系，并且能够对TOF相机的非视域成像起到优化指导作用。}
+\abstract{The purpose of nonline of sight imaging (NLOS) is to take pictures or three-dimensional information reconstruction of a targets in a corner which are outside of the camera field of view. It is a computational imaging technology. Intermediary surface reflection is needed for off-site target imaging. Owing to characteristics of bidirectional reflection distribution function (BRDF) and different targets in scenarios, this reflection is a random scattering process which make reconstruction of NLOS be difficult. In our works, a geometric optical path model and measuring method of intermediary surface BRDF based on TOF camrea are proposed in ideal scenario for NLOS imaging. This model can be used to analyze the relationship between the TOF camera's field of view and the dimension of obstacle gap and the dimension of intermediary surface. A relation of images and objects can be calculated by the BRDF property of intermediary surface. It can be a guidance in the optimization of NLOS imaging of TOF camera.}
+
+% Keywords
+\keyword{TOF camera; BRDF; NLOS}
+
+\begin{document}
+\section{Introduction}
+\label{sect:Introduction}%引用放在最后翻译之后做，因为要一边做一边插入文献。
+%要固定好特定的几种材料
+%非视域成像是指成像系统借助中介面对光信号的反射，实现系统视场以外目标的成像方法。该成像方法能够绕过障碍物对拐角处的目标实施成像。非视域成像的这种特点未来能广泛应用于消防救援、反恐侦察、医疗成像等领域，具有广泛用前景。近年来逐渐成为人们关注的焦点。
+Non-line of sight imaging means that the targets outside the field of view are imaged or reconstituted by reflection of intermediary surface. This imaging method can image the targets at the corner around the obstacle, which feature can be widely used in fire scene, anti-terrorism, medical imaging and other fields in the future. this issue has recently received significant attention in community.
+%（引用）麻省理工学院早期提出的一种椭圆反投影算法，利用条纹管相机和飞秒激光器实现了拐角处目标的计算成像，中介面为朗伯体，目前该方法被广泛采用和改进。成像时间，器件成本以及中介面的材料成为非视域的研究重点，之后瑞典采用汽车玻璃和门等自然物体成功实现非视域目标的观察，德国研究了中介面玻璃窗户的角度对非视域成像的影响。北理工理工大学研究了瓷砖等中介面在非视域成像中的成像效果。
+
+%近年来，非视域场景中快速高精度的成像算法与朗伯体中间面和低成本成像工具之间的矛盾为研究热点。中介面对于非视域成像结果有着直接且显著的影响。中介面对光学的反射特性通常可以使用BRDF来表示。一束光入射到中介面上后，散射光可以分为随机漫反射部分和镜面反射部分。在非视域成像问题中，随机漫反射成分越多，越不利于成像。本文基于TOF三维成像相机的条件下，总结提出非视域成像场景中的一些极值问题以及定性的分析了中介面BRDF对非视域成像的影响。给出了一种通过TOF相机测量BRDF的方法以及非视域计算成像的评价方法。
+In recent years, the contradiction between fast and high-precision computational imaging algorithms with Lambert intermediary surface and low-cost imaging tools has become a research hotspot.
+\section{The Principle of Nonline of sight imaging}%提出一种理论模型
+\label{sect:PrincipleNOLS}
+拐角位置目标的光信号通过中介面的反射进入成像系统，在使用适当的算法实现该目标的信息重构。目标的光信号通过中介面的散射后会发生不同程度的随机扩散，导致成像模糊，并且散射带来的信号强度衰减严重，该问题在文献北理工中有详细分析。为得到有效的回光信号，应尽可能的接收目标返回光信号，并且避开一次散射的强杂散光。成像结构如图所示，S区域为理想非视域成像基本场景，S'为以中介面为对称轴的辅助镜像场景。场景S中，A点为相机所在位置，并具有接收视场α角。B点为主动照明光源发出点，点光源发出的光通过中介面II'对目标实施照明，但由于中介面BRDF的特性，点光源出现发散角β，目标有效光信号同样会出现β角大小的扩散，导致成像结果被放大，并且与距离相关。有效信号通过障碍物与中介面之间的空隙，因此相机视场角α与空隙d1存在关系：
+\begin{equation}
+  \frac{sin\alpha }{2d_1}=f\left (p_{TOF}\right )
+\end{equation}
+\begin{equation}
+  \frac{sin\alpha }{2d_1}=\frac{d_2\sqrt{d_2^2+\left (d_3+ 2d_1\right )^2}}{\sqrt{d_2^2+d_3^2}}
+\end{equation}
+其中，。并且相机视场角α与中介面尺寸d_I存在关系：
+\begin{equation}
+\frac{sin\alpha }{2d_1}=\frac{d_2\sqrt{d_2^2+\left (d_3+ 2d_1\right )^2}}{\sqrt{d_2^2+d_3^2}}
+\end{equation}
+其中，。假设将中介面看做是一次接受的传感器，由于其BRDF特性对回光信号的散射作用，相机所接收的像相当于点扩散之后的结果，如果已知中介面BRDF特性对光信号的扩散角度，则通过对模糊深度图像反卷积运算得到目标的三维信息。
+\section{The Method of Getting BRDF by TOF camera}%提出一种、BRDF测量方法
+\label{sect:BRDFTOF}
+BRDF函数从辐射度角度定义了入射方向上和给定出射方向上辐射率的关系。描述了入射光线经过不透明物体表面的反射后在各个出射方向上的分布。针对于不同的材料，BRDF理论模型种类繁多，根据计算方式可分为经验统计模型、物理模型和半经验模型三种。半经验模型综合了经验模型与物理模型的优点，应用较为广泛。比较常见的BRDF模型有Minnaert（平缓），TS，Blinn-phong，Cook-Torrance等，给定入射角和出射角，多次测量入射光和出射光的辐射率即可拟合出函数中的参数。
+
+引用3篇，BRDF的测量方法设定好入射光角度，测量多个出射光角度，进而计算函数中的参数。。。。等人采用相机测量BRDF，有什么特点，。。。等人测量有什么特点，。。。测量有什么特点。
+
+BRDF函数描述了材料表面光学反射特性。它定义了不同波长的光线在不透明表面入射辐射与反射辐射之间的函数关系，基本表达式为：
+\begin{equation}
+ f_{BRDF}\left(\theta _i, \varphi _i, \theta _r, \varphi _r\right)=\frac{L\left(\theta _r, \varphi _r\right)}{E\left(\theta _i, \varphi _i\right)}
+\end{equation}
+其中$\theta _i, \varphi _i$为入射光的天顶角和方位角，$\theta _r, \varphi _r$为出射光的方位角与天顶角。传统的BRDF模型一般基为物理模型或经验模型，往往具有一定针对性。在基于TOF相机的非视域成像中，中介面通常为平整的墙面，地板，天花板等，通常不是理想均匀的平面。一种多层神经网络模型被提出，用于估计中介面BRDF的输入输出特性。多层神经网络可以应用于高度非线性模型的拟合与模拟，多层神经网络模型在一定数据训练条件下，能够模拟BRDF，指定入射和出射角得到归一化的强度值$I_{norm}$。神经网络训练集模型如式所示：
+\begin{equation}
+  C_{TrainingSet}=\left\{\theta _i \varphi _i \theta _r \varphi _r \mid I_{norm}\right\}
+\end{equation}
+所提出的多层感知器，输入为光的入射角度，输出为对应的反射分布。
+在非视域成像问题中，中介面入射光经过散射后，出射光的散射角度是重点关心的问题，不同的材料对出射光光强分布有直接影响。 
+\section{Experiment}%实验验证
+\label{sect:Experiment}
+为实现TOF相机的非视域成像，研究了一种TOF相机测量中介面BRDF的方法。TOF相机通过发出调制光和接收光信号之间的相位差来实现目标三维深度成像。TOF相机可以同时获得目标的强度图和深度信息。并且针对白灰墙面、地板瓷砖、白色油漆面三种日常生活中场景的场景材料做了定量的测量，系统结构如图所示。入射光以点光源入射到材料表面，并且能调节入射光的角度和接收相机的角度。TOF相机在接收反射光时，我们采用了两种方式，一种是去掉镜头将TOF成像传感器作为探测器，另一种方式是在有镜头的情况下对反射光成像。实验数据如图所示：
+%三种材料下，去镜头和不去镜头时的数据，四个不同入射角对应的BRDF曲线。曲线出图。给出三个BRDF的TS模型参数做出参数表格。给出拟合曲线。先是参数表格，再是测量数据和拟合数据的重合图形。
+TOF相机在已知自身位置和光照角度后，进一步采用上述三种材料实现非视域目标的探测。为验证该理论的可行性，目标采用较强反光能力的光亮塑料模型，实验场景设置如图所示：
+%目标使用BIT三个字母，三种不同中介面条件下，采用BRDF反卷积的方法，恢复目标三维形貌的图片。1，实验场景图+目标图。2.材料一非视阈图。3.材料二非视域图。4.材料三非视域图
+
+\section{Discussion}
+\label{sect:Discussion}
+基于中介面的BRDF特点，本文提出一种理想场景下非视域成像的几何模型，在非视域成像时，探测器对目标的有效光信号接收，该模型可以作为一种几何光路分析的指导，一种基于TOF相机的中介面BRDF特性测定方法被提出，可以作为该几何模型的补充。非视域目标的光信号根据BRDF特性做反卷积运算能够起到一定的恢复效果。根据实际测量数据，TOF相机能够有效获得中介面的BRDF特性，并且在进一步的非视域成像中起到先验经验的作用。非视域成像数据表明有效信号经过随机散射后强度衰减严重，有效信号极易受到中介面强散射的影响。未来可根据本论文提出的几何理论模型从探测器件和成像算法方面做深入研究。
+
+\section{Conclusions}
+\label{sect:Conclusions}
+提出了一种理想情况下非视域成像的几何光路模型，分析了中介面尺寸和相机视场角的关系，障碍物缝隙尺寸和相机视场角的关系以及中介面BRDF特性对非视域成像的影响。论文还提出了一种基于TOF相机的BRDF测量方法，能够在非视域成像中起到补偿作用。实验数据验证了所提理论的可行性，并且通过BRDF特性对成像结果去卷积运算可一定程度上恢复拐角处目标信息。
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\acknowledgments{The first author would like to thank his supervisor,  Xia Wang, Zhi-Bin Sun and Bing-Hua Su who have provided me with valuable guidance in every stage of the work.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\authorcontributions{Yu-Jie Fang, Xia Wang and Zhi-Bin Sun proposed the idea; Yu-Jie Fang, Zheng-Yang Shi and Si He designed and performed the experiments; Yu-Jie Fang analyzed the data and wrote the manuscript; and Bing-Hua Su provided the guidance for paper writing.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\conflictsofinterest{The authors declare no conflict of interest.}
+
+
+%=====================================
+% References, variant A: internal bibliography
+%=====================================
+%\reftitle{References}
+%\begin{thebibliography}{999}
+%% Reference 1
+%\bibitem[Author1(year)]{ref-journal}
+%Author1, T. The title of the cited article. {\em Journal Abbreviation} {\bf 2008}, {\em 10}, 142-149, DOI.
+%% Reference 2
+%\bibitem[Author2(year)]{ref-book}
+%Author2, L. The title of the cited contribution. In {\em The Book Title}; Editor1, F., Editor2, A., Eds.; Publishing House: City, Country, 2007; pp. 32-58, ISBN.
+%\end{thebibliography}
+
+\reftitle{References}
+%=====================================
+% References, variant B: external bibliography
+%=====================================
+\externalbibliography{yes}
+\bibliography{TOFref.bib}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% optional
+%\sampleavailability{Samples of the compounds ...... are available from the authors.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
